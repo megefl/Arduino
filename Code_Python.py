@@ -1,7 +1,8 @@
-# Step 1
+# Step 2
 # Partie Python 
 import serial; 
 import sys
+import time
 from serial. serialutil import SerialException
  
 serialPort = serial.Serial(); 
@@ -22,7 +23,13 @@ try :
     print('Serial port opened. Write run character.') 
     cmd = "r"
     serialPort.write(cmd.encode(encoding="ascii")) 
-    serialPort.close() 
+    startTime = time.time()
+    endTime = startTime
+    while (endTime - startTime < 10) :
+        endTime = time.time ()
+    cmd = "s";
+    serialPort.write(cmd.encode(encoding="ascii"))
+    serialPort.close()
     print ('Port closed') 
 except Exception as exception : 
     print(' Exception occurred while writing run character') 
