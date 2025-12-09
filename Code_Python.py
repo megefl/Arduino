@@ -1,52 +1,49 @@
-import serial
-import sys
-import time
+import serial;
 from serial.serialutil import SerialException
+import time
 
-serialPort = serial.Serial()
-serialPort.baudrate = 1000000
+serialPort = serial.Serial();
+serialPort.baudrate = 1000000;
 serialPort.port = '/dev/cu.usbmodem34B7DA657B442'
-serialPort.parity = serial.PARITY_NONE
-serialPort.stopbits = serial.STOPBITS_ONE
-serialPort.bytesize = serial.EIGHTBITS
-serialPort.timeout = 0.1  # ← TIMEOUT 100ms (CRUCIAL !)
+serialPort.parity = serial.PARITY_NONE;
+serialPort.stopbits = serial.STOPBITS_ONE;
+serialPort.bytesize = serial.EIGHTBITS;
 
-try:
-    serialPort.open()
+try :
+    serialPort.open();
 except SerialException as serialException:
     print(serialException)
-    sys.exit()
-
-if not serialPort.isOpen():
-    print('Serial port not opened')
-    sys.exit()
-
-try:
-    print('Serial port opened. Write run character.')
-    cmd = "r"
-    serialPort.write(cmd.encode(encoding="ascii"))
     
+if(not serialPort.isOpen()):
+    print('Serial port not opened')
+    exit()
+
+try :
+    print('Serial port opened. Write run character.')
+    cmd = "r";
+    serialPort.write(cmd.encode(encoding="ascii"))
+    serialPort.flush();
     startTime = time.time()
     endTime = startTime
-    
-    # Durée d'acquisition : 10 secondes
-    while (endTime - startTime < 10):
-        if serialPort.in_waiting:  # Données disponibles
-            line = serialPort.readline().decode('utf-8').strip()
-            print(f"Temps écoulé: {line} s")
-        
-        endTime = time.time()
-    
-    print("Envoi du signal de redémarrage...")
-    cmd = "s"
+    lines = []
+    while(endTime - startTime < 10):
+        endTime = time.time()        
+        line = serialPort.readline()
+        # line = line.rstrip()
+        lines.append(line)
+    cmd = "s";
     serialPort.write(cmd.encode(encoding="ascii"))
-    serialPort.close()
+    serialPort.flush();
+    serialPort.close()        
     print('Port closed')
-    
-except Exception as exception:
-    print('Exception occurred')
+    times = [];
+    for row in lines:
+        time = row.decode('ascii')
+        times.append(float(int(time)/1000000.0))
+    print(len(times));
+    print(times[len(times)-1]);
+except Exception as exception :    
+    print('Exception occurred while writing/reading characters')
     print(exception)
     serialPort.close()
     print('Port closed')
-
-
